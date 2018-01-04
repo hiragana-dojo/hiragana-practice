@@ -68,6 +68,7 @@
             filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#00ffffff', endColorstr='#ffffff', GradientType=1); /* IE6-9 */
         }
 
+        /*noinspection CssUnusedSymbol*/
         .hit {
             margin: 0.2em;
             color: #6dab6d;
@@ -77,6 +78,7 @@
             align-items: center;
         }
 
+        /*noinspection CssUnusedSymbol*/
         .miss {
             margin: 0.2em;
             color: #c24b4b;
@@ -225,7 +227,10 @@
     </div>
 
     <span id="hiragana"></span>
+
+    <!--suppress HtmlFormInputWithoutLabel -->
     <input id="input_prompt"/>
+
     <div id="history-wrap">
         <div id="overlay"></div>
         <div id="history">
@@ -268,7 +273,7 @@
             include_dakouten: document.getElementById("setting-include-dakouten"),
             insane: document.getElementById("setting-insane"),
             save: document.getElementById("save-settings"),
-            open: document.getElementById("settings-button"),
+            open: document.getElementById("settings-button")
         }
     };
 
