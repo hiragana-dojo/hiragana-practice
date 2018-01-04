@@ -1,6 +1,7 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" type="image/png" href="favicon.png?v=10"/>
     <title>Hiragana Practice</title>
     <style>
         #main {
@@ -119,7 +120,7 @@
     </div>
 
     <span id="hiragana"></span>
-    <input id="input_prompt" placeholder="???"/>
+    <input id="input_prompt"/>
     <div id="history-wrap">
         <div id="overlay"></div>
         <div id="history">
@@ -209,7 +210,7 @@
 
     elem_input_prompt.addEventListener("blur", function () {
         elem_input_prompt.value = "";
-        elem_input_prompt.placeholder = "???";
+        elem_input_prompt.placeholder = state.current_hiragana[1];
     }, true);
 
     elem_input_prompt.addEventListener("input", function () {
@@ -240,6 +241,7 @@
     }, true);
 
     show_new_hiragana();
+    elem_input_prompt.placeholder = state.current_hiragana[1];
 
 </script>
 </body>
