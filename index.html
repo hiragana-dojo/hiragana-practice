@@ -1,0 +1,190 @@
+<html>
+<head>
+    <style>
+        #main {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        #score {
+            font-size: 2em;
+            font-weight: bold;
+            font-family: monospace;
+            width: 100%;
+            text-align: center;
+            color: #808080;
+            padding: 1em;
+        }
+
+        #hiragana {
+            font-size: 8em;
+            width: 100%;
+            text-align: center;
+        }
+
+        #history-wrap {
+            width: 50%;
+            overflow: hidden;
+            display: flex;
+            margin: 2em;
+        }
+
+        #history {
+            display: flex;
+            min-height: 2em;
+            font-weight: bold;
+            font-size: 2em;
+            align-items: center;
+            flex-direction: row;
+        }
+
+        #history div {
+            background: #ddd;
+            padding: .1em;
+            -webkit-border-radius: 0.2em;
+            -moz-border-radius: 0.2em;
+            border-radius: 0.2em;
+        }
+
+        .hit {
+            margin: 0.2em;
+            color: #6dab6d;
+            overflow: hidden;
+            flex-wrap: nowrap;
+            display: flex;
+            align-items: center;
+        }
+
+        .miss {
+            margin: 0.2em;
+            color: #c24b4b;
+            overflow: hidden;
+            flex-wrap: nowrap;
+            display: flex;
+            align-items: center;
+        }
+
+        .miss span {
+            font-family: monospace;
+            color: #959595
+        }
+
+        #input_prompt {
+            border: 0;
+            border-bottom: 1px solid #323232;
+            text-align: center;
+            background-color: rgba(0, 0, 0, 0);
+            color: #808080;
+
+            width: 4em;
+            font-size: 3em;
+            font-weight: bold;
+        }
+
+        #input_prompt:focus {
+            border-bottom: 4px solid #323232;
+            color: #121212;
+        }
+
+    </style>
+</head>
+<body>
+<div id="main">
+    <span id="score">0</span>
+    <span id="hiragana"></span>
+    <input id="input_prompt" placeholder="???"/>
+    <div id="history-wrap">
+        <div id="history">
+            <div class="miss">&#x3046<span>(u)</span></div>
+        </div>
+    </div>
+</div>
+<script>
+    show_new_hiragana = function () {
+        input_prompt.value = "";
+        current_hiragana = HIRAGANA_LIST[Math.floor(Math.random() * HIRAGANA_LIST.length)];
+        document.getElementById("hiragana").innerHTML = current_hiragana.hiragana;
+    };
+
+    register_guess = function (hiragana) {
+        set_score(score + 10);
+        push_history(hiragana, true);
+        show_new_hiragana();
+    };
+
+    register_miss = function (hiragana) {
+        set_score(score - 10);
+        push_history(hiragana, false);
+        show_new_hiragana();
+    };
+
+    set_score = function (new_score) {
+        score = new_score;
+        document.getElementById("score").innerText = score;
+    };
+
+    push_history = function (hiragana, hit) {
+        var new_element = document.createElement("div");
+        new_element.className = hit ? "hit" : "miss";
+        new_element.innerText = hiragana.hiragana;
+
+        if (!hit) {
+            var elem_solution = document.createElement("span");
+            elem_solution.innerText = "(" + hiragana.text + ")";
+            new_element.appendChild(elem_solution);
+        }
+
+        elem_history.insertBefore(new_element, elem_history.children[0]);
+    };
+
+    var HIRAGANA_LIST = [
+        {hiragana: "\u3042", text: "a"},
+        {hiragana: "\u3044", text: "i"}
+    ];
+
+    var score = 0;
+    var history = [];
+
+    var current_hiragana = HIRAGANA_LIST[0];
+
+    var elem_history = document.getElementById("history");
+
+    var input_prompt = document.getElementById("input_prompt");
+    input_prompt.addEventListener("focus", function () {
+        input_prompt.value = "";
+        input_prompt.placeholder = "";
+    }, true);
+
+    input_prompt.addEventListener("blur", function () {
+        input_prompt.value = "";
+        input_prompt.placeholder = "???";
+    }, true);
+
+    input_prompt.addEventListener("input", function () {
+        if (input_prompt.value === current_hiragana.text) {
+            setTimeout(function () {
+                register_guess(current_hiragana)
+            }, 100);
+        }
+    }, true);
+
+    input_prompt.addEventListener("keypress", function (event) {
+        if (event.keyCode === 13) {
+            setTimeout(function () {
+                register_miss(current_hiragana)
+            }, 100);
+        }
+    }, true);
+
+    show_new_hiragana();
+
+    var hiragana = [
+        {hiragana: "\u3042", text: "a"},
+        {hiragana: "\u3044", text: "i"}
+    ];
+
+</script>
+</body>
+</html>
