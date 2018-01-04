@@ -4,6 +4,11 @@
     <link rel="shortcut icon" type="image/png" href="favicon.png?v=10"/>
     <title>Hiragana Practice</title>
     <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+        }
+
         #main {
             width: 100%;
             display: flex;
@@ -18,7 +23,7 @@
             width: 100%;
             text-align: center;
             color: #808080;
-            padding: 1em;
+            padding: 1em 0;
         }
 
         #hiragana {
@@ -95,6 +100,7 @@
             width: 4em;
             font-size: 3em;
             font-weight: bold;
+            outline: none;
         }
 
         #input_prompt:focus {
@@ -110,10 +116,106 @@
             color: #c24b4b;
         }
 
+        #settings-button {
+            position: absolute;
+            margin-left: 50vw;
+            margin-top: 1em;
+            font-weight: bold;
+            font-family: monospace;
+            font-size: 1.5em;
+            background: #eee;
+            padding: .2em .5em;
+            border-radius: .2em;
+            color: #444;
+            -moz-user-select: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        #settings-button:hover {
+            background: #d6d6d6;
+            color: #000;
+            cursor: pointer;
+        }
+
+        #settings-overlay {
+            height: 100vh;
+            width: 100vw;
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            left: 0;
+            top: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            align-items: center;
+            visibility: hidden;
+        }
+
+        #settings-panel {
+            width: 20em;
+            height: 14em;
+            background: white;
+            padding: 2em;
+            border-radius: 1em;
+            font-family: sans-serif;
+        }
+
+        h1 {
+            font-family: sans-serif;
+            color: #666;
+            width: 100%;
+            padding-bottom: 0.5em;
+            border-bottom: 1px solid #333;
+            margin: 0 0 1em;
+        }
+
+        form p {
+            display: flex;
+            min-width: 15em;
+            flex-direction: row;
+            justify-content: space-between;
+        }
+
+        #settings-panel a {
+            color: #888;
+            font-family: sans-serif;
+        }
+
     </style>
 </head>
 <body>
 <div id="main">
+    <div id="settings-overlay">
+        <div id="settings-panel">
+            <h1>Settings</h1>
+            <form>
+                <p>
+                    <label for="setting-duolingo-level">Duolingo level</label>
+                    <select id="setting-duolingo-level">
+                        <option value="0">Ignored</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                    </select>
+                </p>
+                <p>
+                    <label for="setting-include-dakouten">Include dakouten</label>
+                    <input id="setting-include-dakouten" type="checkbox"/>
+                </p>
+                <p>
+                    <label for="setting-ruthless">Ruthless</label>
+                    <input id="setting-ruthless" type="checkbox"/>
+                </p>
+            </form>
+            <a href="#">Save</a>
+        </div>
+    </div>
+
+    <div id="settings-button">&#9776;</div>
     <div id="score">
         <span id="hits">0</span>
         <span id="misses">0</span>
@@ -126,6 +228,7 @@
         <div id="history">
         </div>
     </div>
+
 </div>
 <script>
 
@@ -138,10 +241,11 @@
         /*["\u3090", "wi", 0], ["\u3091", "we", 0],*/ ["\u3092", "wo", 0], ["\u3093", "n", 0] /*["\u3094", "vu", 0], ["\u3095", "ka", 0], ["\u3096", "ke", 0],*/];
 
     settings = {
-        ruthless: false,
+        ruthless: true,
         delay_hit: 10,
-        delay_miss: 20,
-        show_diacritics: true
+        delay_miss: 400,
+        show_diacritics: true,
+        duolingo_level: 0
     };
 
     state = {
@@ -242,6 +346,7 @@
 
     show_new_hiragana();
     elem_input_prompt.placeholder = state.current_hiragana[1];
+    elem_input_prompt.focus();
 
 </script>
 </body>
