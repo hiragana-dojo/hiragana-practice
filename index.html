@@ -20,6 +20,7 @@
 
         #hiragana {
             font-size: 8em;
+            font-weight: bold;
             width: 100%;
             text-align: center;
         }
@@ -48,6 +49,17 @@
             border-radius: 0.2em;
         }
 
+        #history-wrap #overlay {
+            position: absolute;
+            background: red;
+            height: 100px;
+            width: 50%;
+            background: -moz-linear-gradient(left, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0) 82%, rgba(255, 255, 255, 1) 97%, rgba(255, 255, 255, 1) 100%); /* FF3.6-15 */
+            background: -webkit-linear-gradient(left, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0) 82%, rgba(255, 255, 255, 1) 97%, rgba(255, 255, 255, 1) 100%); /* Chrome10-25,Safari5.1-6 */
+            background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0) 82%, rgba(255, 255, 255, 1) 97%, rgba(255, 255, 255, 1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+            filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#00ffffff', endColorstr='#ffffff', GradientType=1); /* IE6-9 */
+        }
+
         .hit {
             margin: 0.2em;
             color: #6dab6d;
@@ -68,16 +80,15 @@
 
         .miss span {
             font-family: monospace;
-            color: #959595
+            color: #959595;
         }
 
         #input_prompt {
             border: 0;
-            border-bottom: 1px solid #323232;
+            border-bottom: 1px solid #808080;
             text-align: center;
             background-color: rgba(0, 0, 0, 0);
             color: #808080;
-
             width: 4em;
             font-size: 3em;
             font-weight: bold;
@@ -88,102 +99,145 @@
             color: #121212;
         }
 
+        #score #hits {
+            color: #6dab6d;
+        }
+
+        #score #misses {
+            color: #c24b4b;
+        }
+
     </style>
 </head>
 <body>
 <div id="main">
-    <span id="score">0</span>
+    <div id="score">
+        <span id="hits">0</span>
+        <span id="misses">0</span>
+    </div>
+
     <span id="hiragana"></span>
     <input id="input_prompt" placeholder="???"/>
     <div id="history-wrap">
+        <div id="overlay"></div>
         <div id="history">
-            <div class="miss">&#x3046<span>(u)</span></div>
         </div>
     </div>
 </div>
 <script>
+
+    var HIRAGANA_LIST = [
+        ["\u3042", "a", 0], ["\u3044", "i", 0], ["\u3046", "u", 0], ["\u3048", "e", 0], ["\u304A", "o", 0], ["\u304B", "ka", 0], ["\u304C", "ga", 1], ["\u304D", "ki", 0], ["\u304E", "gi", 1], ["\u304F", "ku", 0],
+        ["\u3050", "gu", 1], ["\u3051", "ke", 0], ["\u3052", "ge", 1], ["\u3053", "ko", 0], ["\u3054", "go", 1], ["\u3055", "sa", 0], ["\u3056", "za", 1], ["\u3057", "shi", 0], ["\u3058", "ji", 1], ["\u3059", "su", 0], ["\u305A", "zu", 1], ["\u305B", "se", 0], ["\u305C", "ze", 1], ["\u305D", "so", 0], ["\u305E", "zo", 1], ["\u305F", "ta", 0],
+        ["\u3060", "da", 1], ["\u3061", "chi", 0], ["\u3062", "ji", 1], /* ["\u3063", "ko", 0],*/ ["\u3064", "tsu", 0], ["\u3065", "zu", 1], ["\u3066", "te", 0], ["\u3067", "de", 1], ["\u3068", "to", 0], ["\u3069", "do", 1], ["\u306A", "na", 1], ["\u306B", "ni", 0], ["\u306C", "nu", 0], ["\u306D", "ne", 0], ["\u306E", "no", 0], ["\u306F", "ha", 0],
+        ["\u3070", "ba", 1], ["\u3071", "pa", 2], ["\u3072", "hi", 0], ["\u3073", "bi", 1], ["\u3074", "pi", 2], ["\u3075", "fu", 0], ["\u3076", "zu", 1], ["\u3077", "pu", 2], ["\u3078", "he", 0], ["\u3079", "be", 1], ["\u307A", "pe", 2], ["\u307B", "ho", 1], ["\u307C", "bo", 1], ["\u307D", "po", 2], ["\u307E", "ma", 0], ["\u307F", "mi", 0],
+        ["\u3080", "mu", 0], ["\u3081", "me", 0], ["\u3082", "mo", 0], /*["\u3083", "bi", 0],*/ ["\u3084", "ya", 0], /*["\u3085", "su", 0],*/ ["\u3086", "yu", 0], /*["\u3087", "pu", 2],*/ ["\u3088", "yo", 0], ["\u3089", "ra", 0], ["\u308A", "ri", 0], ["\u308B", "ru", 0], ["\u308C", "re", 0], ["\u308D", "ro", 0], /*["\u308E", "wa", 0],*/ ["\u308F", "wa", 0],
+        /*["\u3090", "wi", 0], ["\u3091", "we", 0],*/ ["\u3092", "wo", 0], ["\u3093", "n", 0] /*["\u3094", "vu", 0], ["\u3095", "ka", 0], ["\u3096", "ke", 0],*/];
+
+    settings = {
+        ruthless: false,
+        delay_hit: 10,
+        delay_miss: 20,
+        show_diacritics: true
+    };
+
+    state = {
+        input_lock: false,
+        score: [0, 0],
+        current_hiragana: HIRAGANA_LIST[0]
+    };
+
+
+    var elem_history = document.getElementById("history");
+    var elem_input_prompt = document.getElementById("input_prompt");
+    var elem_score_hits = document.getElementById("hits");
+    var elem_score_misses = document.getElementById("misses");
+
     show_new_hiragana = function () {
-        input_prompt.value = "";
-        current_hiragana = HIRAGANA_LIST[Math.floor(Math.random() * HIRAGANA_LIST.length)];
-        document.getElementById("hiragana").innerHTML = current_hiragana.hiragana;
+        var previous_hiragana = state.current_hiragana;
+
+        elem_input_prompt.value = "";
+        state.current_hiragana = HIRAGANA_LIST[Math.floor(Math.random() * HIRAGANA_LIST.length)];
+
+        while (!settings.show_diacritics && state.current_hiragana[2] > 0 || state.current_hiragana === previous_hiragana) {
+            state.current_hiragana = HIRAGANA_LIST[Math.floor(Math.random() * HIRAGANA_LIST.length)];
+        }
+
+        document.getElementById("hiragana").innerHTML = state.current_hiragana[0];
+        state.input_lock = false;
     };
 
     register_guess = function (hiragana) {
-        set_score(score + 10);
+        state.score[0] += 1;
+        update_score();
         push_history(hiragana, true);
         show_new_hiragana();
     };
 
     register_miss = function (hiragana) {
-        set_score(score - 10);
+        state.score[1] += 1;
+        update_score();
         push_history(hiragana, false);
         show_new_hiragana();
     };
 
-    set_score = function (new_score) {
-        score = new_score;
-        document.getElementById("score").innerText = score;
+    update_score = function () {
+        elem_score_hits.innerText = state.score[0];
+        elem_score_misses.innerText = state.score[1];
     };
 
     push_history = function (hiragana, hit) {
         var new_element = document.createElement("div");
         new_element.className = hit ? "hit" : "miss";
-        new_element.innerText = hiragana.hiragana;
+        new_element.innerText = hiragana[0];
 
         if (!hit) {
             var elem_solution = document.createElement("span");
-            elem_solution.innerText = "(" + hiragana.text + ")";
+            elem_solution.innerText = "(" + hiragana[1] + ")";
             new_element.appendChild(elem_solution);
         }
 
         elem_history.insertBefore(new_element, elem_history.children[0]);
     };
 
-    var HIRAGANA_LIST = [
-        {hiragana: "\u3042", text: "a"},
-        {hiragana: "\u3044", text: "i"}
-    ];
-
-    var score = 0;
-    var history = [];
-
-    var current_hiragana = HIRAGANA_LIST[0];
-
-    var elem_history = document.getElementById("history");
-
-    var input_prompt = document.getElementById("input_prompt");
-    input_prompt.addEventListener("focus", function () {
-        input_prompt.value = "";
-        input_prompt.placeholder = "";
+    elem_input_prompt.addEventListener("focus", function () {
+        elem_input_prompt.value = "";
+        elem_input_prompt.placeholder = "";
     }, true);
 
-    input_prompt.addEventListener("blur", function () {
-        input_prompt.value = "";
-        input_prompt.placeholder = "???";
+    elem_input_prompt.addEventListener("blur", function () {
+        elem_input_prompt.value = "";
+        elem_input_prompt.placeholder = "???";
     }, true);
 
-    input_prompt.addEventListener("input", function () {
-        if (input_prompt.value === current_hiragana.text) {
+    elem_input_prompt.addEventListener("input", function () {
+        if (state.input_lock) {
+            return;
+        }
+
+        if (elem_input_prompt.value === state.current_hiragana[1]) {
             setTimeout(function () {
-                register_guess(current_hiragana)
-            }, 100);
+                register_guess(state.current_hiragana)
+            }, settings.delay_hit);
+            state.input_lock = true;
+        } else if (settings.ruthless && state.current_hiragana[1].indexOf(elem_input_prompt.value) !== 0) {
+            setTimeout(function () {
+                register_miss(state.current_hiragana)
+            }, settings.delay_miss);
+            state.input_lock = true;
         }
     }, true);
 
-    input_prompt.addEventListener("keypress", function (event) {
+    elem_input_prompt.addEventListener("keypress", function (event) {
         if (event.keyCode === 13) {
             setTimeout(function () {
-                register_miss(current_hiragana)
-            }, 100);
+                register_miss(state.current_hiragana)
+            }, settings.delay_miss);
+            state.input_lock = true;
         }
     }, true);
 
     show_new_hiragana();
-
-    var hiragana = [
-        {hiragana: "\u3042", text: "a"},
-        {hiragana: "\u3044", text: "i"}
-    ];
 
 </script>
 </body>
