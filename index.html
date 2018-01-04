@@ -151,7 +151,6 @@
             justify-content: center;
             flex-direction: column;
             align-items: center;
-            visibility: hidden;
         }
 
         #settings-panel {
@@ -184,11 +183,15 @@
             font-family: sans-serif;
         }
 
+        .hidden {
+            visibility: hidden;
+        }
+
     </style>
 </head>
 <body>
 <div id="main">
-    <div id="settings-overlay">
+    <div id="settings-overlay" class="hidden">
         <div id="settings-panel">
             <h1>Settings</h1>
             <form>
@@ -211,7 +214,7 @@
                     <input id="setting-ruthless" type="checkbox"/>
                 </p>
             </form>
-            <a href="#">Save</a>
+            <a id="save-settings" href="#">Save</a>
         </div>
     </div>
 
@@ -232,7 +235,7 @@
 </div>
 <script>
 
-    var HIRAGANA_LIST = [
+    hiragana_list = [
         ["\u3042", "a", 0], ["\u3044", "i", 0], ["\u3046", "u", 0], ["\u3048", "e", 0], ["\u304A", "o", 0], ["\u304B", "ka", 0], ["\u304C", "ga", 1], ["\u304D", "ki", 0], ["\u304E", "gi", 1], ["\u304F", "ku", 0],
         ["\u3050", "gu", 1], ["\u3051", "ke", 0], ["\u3052", "ge", 1], ["\u3053", "ko", 0], ["\u3054", "go", 1], ["\u3055", "sa", 0], ["\u3056", "za", 1], ["\u3057", "shi", 0], ["\u3058", "ji", 1], ["\u3059", "su", 0], ["\u305A", "zu", 1], ["\u305B", "se", 0], ["\u305C", "ze", 1], ["\u305D", "so", 0], ["\u305E", "zo", 1], ["\u305F", "ta", 0],
         ["\u3060", "da", 1], ["\u3061", "chi", 0], ["\u3062", "ji", 1], /* ["\u3063", "ko", 0],*/ ["\u3064", "tsu", 0], ["\u3065", "zu", 1], ["\u3066", "te", 0], ["\u3067", "de", 1], ["\u3068", "to", 0], ["\u3069", "do", 1], ["\u306A", "na", 1], ["\u306B", "ni", 0], ["\u306C", "nu", 0], ["\u306D", "ne", 0], ["\u306E", "no", 0], ["\u306F", "ha", 0],
@@ -241,7 +244,7 @@
         /*["\u3090", "wi", 0], ["\u3091", "we", 0],*/ ["\u3092", "wo", 0], ["\u3093", "n", 0] /*["\u3094", "vu", 0], ["\u3095", "ka", 0], ["\u3096", "ke", 0],*/];
 
     settings = {
-        ruthless: true,
+        ruthless: false,
         delay_hit: 10,
         delay_miss: 400,
         show_diacritics: true,
@@ -251,23 +254,32 @@
     state = {
         input_lock: false,
         score: [0, 0],
-        current_hiragana: HIRAGANA_LIST[0]
+        current_hiragana: hiragana_list[0]
     };
 
-
-    var elem_history = document.getElementById("history");
-    var elem_input_prompt = document.getElementById("input_prompt");
-    var elem_score_hits = document.getElementById("hits");
-    var elem_score_misses = document.getElementById("misses");
+    elements = {
+        history: document.getElementById("history"),
+        input_prompt: document.getElementById("input_prompt"),
+        score_hits: document.getElementById("hits"),
+        score_misses: document.getElementById("misses"),
+        settings: {
+            overlay: document.getElementById("settings-overlay"),
+            duolingo_level: document.getElementById("setting-duolingo-overlay"),
+            include_dakouten: document.getElementById("setting-include-dakouten"),
+            insane: document.getElementById("setting-insane"),
+            save: document.getElementById("save-settings"),
+            open: document.getElementById("settings-button"),
+        }
+    };
 
     show_new_hiragana = function () {
         var previous_hiragana = state.current_hiragana;
 
-        elem_input_prompt.value = "";
-        state.current_hiragana = HIRAGANA_LIST[Math.floor(Math.random() * HIRAGANA_LIST.length)];
+        elements.input_prompt.value = "";
+        state.current_hiragana = hiragana_list[Math.floor(Math.random() * hiragana_list.length)];
 
         while (!settings.show_diacritics && state.current_hiragana[2] > 0 || state.current_hiragana === previous_hiragana) {
-            state.current_hiragana = HIRAGANA_LIST[Math.floor(Math.random() * HIRAGANA_LIST.length)];
+            state.current_hiragana = hiragana_list[Math.floor(Math.random() * hiragana_list.length)];
         }
 
         document.getElementById("hiragana").innerHTML = state.current_hiragana[0];
@@ -289,8 +301,8 @@
     };
 
     update_score = function () {
-        elem_score_hits.innerText = state.score[0];
-        elem_score_misses.innerText = state.score[1];
+        elements.score_hits.innerText = state.score[0];
+        elements.score_misses.innerText = state.score[1];
     };
 
     push_history = function (hiragana, hit) {
@@ -304,49 +316,78 @@
             new_element.appendChild(elem_solution);
         }
 
-        elem_history.insertBefore(new_element, elem_history.children[0]);
+        elements.history.insertBefore(new_element, elements.history.children[0]);
     };
 
-    elem_input_prompt.addEventListener("focus", function () {
-        elem_input_prompt.value = "";
-        elem_input_prompt.placeholder = "";
-    }, true);
+    /**
+     * Settings
+     */
+    show_settings = function () {
+        // TODO: populate values
+        elements.settings.overlay.className = "";
+    };
 
-    elem_input_prompt.addEventListener("blur", function () {
-        elem_input_prompt.value = "";
-        elem_input_prompt.placeholder = state.current_hiragana[1];
-    }, true);
+    save_settings = function () {
+        // TODO: save values
+        elements.settings.overlay.className = "hidden";
+    };
 
-    elem_input_prompt.addEventListener("input", function () {
-        if (state.input_lock) {
-            return;
-        }
+    /**
+     * Main code
+     */
 
-        if (elem_input_prompt.value.toLowerCase() === state.current_hiragana[1].toLowerCase()) {
-            setTimeout(function () {
-                register_guess(state.current_hiragana)
-            }, settings.delay_hit);
-            state.input_lock = true;
-        } else if (settings.ruthless && state.current_hiragana[1].indexOf(elem_input_prompt.value) !== 0) {
-            setTimeout(function () {
-                register_miss(state.current_hiragana)
-            }, settings.delay_miss);
-            state.input_lock = true;
-        }
-    }, true);
+    init_listeners = function () {
+        elements.input_prompt.addEventListener("focus", function () {
+            elements.input_prompt.value = "";
+            elements.input_prompt.placeholder = "";
+        }, true);
 
-    elem_input_prompt.addEventListener("keypress", function (event) {
-        if (event.keyCode === 13) {
-            setTimeout(function () {
-                register_miss(state.current_hiragana)
-            }, settings.delay_miss);
-            state.input_lock = true;
-        }
-    }, true);
+        elements.input_prompt.addEventListener("blur", function () {
+            elements.input_prompt.value = "";
 
+            elements.input_prompt.placeholder = settings.ruthless ? "??" : state.current_hiragana[1];
+        }, true);
+
+        elements.input_prompt.addEventListener("input", function () {
+            if (state.input_lock) {
+                return;
+            }
+
+            if (elements.input_prompt.value.toLowerCase() === state.current_hiragana[1].toLowerCase()) {
+                setTimeout(function () {
+                    register_guess(state.current_hiragana)
+                }, settings.delay_hit);
+                state.input_lock = true;
+            } else if (settings.ruthless && state.current_hiragana[1].indexOf(elements.input_prompt.value) !== 0) {
+                setTimeout(function () {
+                    register_miss(state.current_hiragana)
+                }, settings.delay_miss);
+                state.input_lock = true;
+            }
+        }, true);
+
+        elements.input_prompt.addEventListener("keypress", function (event) {
+            if (event.keyCode === 13) {
+                setTimeout(function () {
+                    register_miss(state.current_hiragana)
+                }, settings.delay_hit);
+                state.input_lock = true;
+            }
+        }, true);
+
+        elements.settings.save.addEventListener("click", function () {
+            save_settings();
+        });
+
+        elements.settings.open.addEventListener("click", function () {
+            show_settings();
+        });
+    };
+
+    init_listeners();
     show_new_hiragana();
-    elem_input_prompt.placeholder = state.current_hiragana[1];
-    elem_input_prompt.focus();
+    elements.input_prompt.placeholder = state.current_hiragana[1];
+    elements.input_prompt.focus();
 
 </script>
 </body>
