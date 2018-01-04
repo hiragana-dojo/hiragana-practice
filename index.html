@@ -200,11 +200,11 @@
                 <p>
                     <label for="setting-duolingo-level">Duolingo level</label>
                     <select id="setting-duolingo-level">
-                        <option value="0">Ignored</option>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
+                        <option value="0">1</option>
+                        <option value="1">2</option>
+                        <option value="2">3</option>
+                        <option value="3">4</option>
+                        <option value="4">Over 9000</option>
                     </select>
                 </p>
                 <p>
@@ -248,12 +248,20 @@
         ["\u3080", "mu", 0], ["\u3081", "me", 0], ["\u3082", "mo", 0], /*["\u3083", "bi", 0],*/ ["\u3084", "ya", 0], /*["\u3085", "su", 0],*/ ["\u3086", "yu", 0], /*["\u3087", "pu", 2],*/ ["\u3088", "yo", 0], ["\u3089", "ra", 0], ["\u308A", "ri", 0], ["\u308B", "ru", 0], ["\u308C", "re", 0], ["\u308D", "ro", 0], /*["\u308E", "wa", 0],*/ ["\u308F", "wa", 0],
         /*["\u3090", "wi", 0], ["\u3091", "we", 0],*/ ["\u3092", "wo", 0], ["\u3093", "n", 0] /*["\u3094", "vu", 0], ["\u3095", "ka", 0], ["\u3096", "ke", 0],*/];
 
+    // TODO: use unicode codes & complete the list
+    duolingo_levels = [
+        ["i", "chi", "ni", "n", "sa", "yo", "ro", "ku", "na", "o", "ha", "u", "shi", "a", "ka"],
+        ["mu", "ki", "ru", "ya", "ke", "no", "su", "te", "ri", "ma", "ho", "ta", "ko", "ra", "wa"],
+        ["nu", "ne", "to", "se", "mi", "me", "fu", "yu", "tsu", "mo", "hi", "re", "e", "he", "so"],
+        ["ga", "ji", "gu", "ge", "go", "za", "ji", "zu", "ze", "zo", "da", "zu", "de", "do", "ba", "be", "zu"]
+    ];
+
     settings = {
         ruthless: false,
         delay_hit: 10,
         delay_miss: 400,
-        show_diacritics: true,
-        duolingo_level: 0
+        include_dakouten: true,
+        duolingo_level: 4
     };
 
     state = {
@@ -269,9 +277,9 @@
         score_misses: document.getElementById("misses"),
         settings: {
             overlay: document.getElementById("settings-overlay"),
-            duolingo_level: document.getElementById("setting-duolingo-overlay"),
+            duolingo_level: document.getElementById("setting-duolingo-level"),
             include_dakouten: document.getElementById("setting-include-dakouten"),
-            insane: document.getElementById("setting-insane"),
+            ruthless: document.getElementById("setting-ruthless"),
             save: document.getElementById("save-settings"),
             open: document.getElementById("settings-button")
         }
@@ -283,7 +291,7 @@
         elements.input_prompt.value = "";
         state.current_hiragana = hiragana_list[Math.floor(Math.random() * hiragana_list.length)];
 
-        while (!settings.show_diacritics && state.current_hiragana[2] > 0 || state.current_hiragana === previous_hiragana) {
+        while (!settings.include_dakouten && state.current_hiragana[2] > 0 || state.current_hiragana === previous_hiragana) {
             state.current_hiragana = hiragana_list[Math.floor(Math.random() * hiragana_list.length)];
         }
 
@@ -328,19 +336,22 @@
      * Settings
      */
     show_settings = function () {
-        // TODO: populate values
         elements.settings.overlay.className = "";
+        elements.settings.ruthless.checked = settings.ruthless;
+        elements.settings.include_dakouten.checked = settings.include_dakouten;
+        elements.settings.duolingo_level.selectedIndex = settings.duolingo_level;
     };
 
     save_settings = function () {
-        // TODO: save values
         elements.settings.overlay.className = "hidden";
+        settings.ruthless = elements.settings.ruthless.checked;
+        settings.include_dakouten = elements.settings.include_dakouten.checked;
+        settings.duolingo_level = elements.settings.duolingo_level.selectedIndex;
     };
 
     /**
      * Main code
      */
-
     init_listeners = function () {
         elements.input_prompt.addEventListener("focus", function () {
             elements.input_prompt.value = "";
