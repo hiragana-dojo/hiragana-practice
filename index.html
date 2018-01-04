@@ -215,7 +215,7 @@
             return;
         }
 
-        if (elem_input_prompt.value === state.current_hiragana[1]) {
+        if (elem_input_prompt.value.toLowerCase() === state.current_hiragana[1].toLowerCase()) {
             setTimeout(function () {
                 register_guess(state.current_hiragana)
             }, settings.delay_hit);
