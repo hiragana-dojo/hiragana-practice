@@ -239,7 +239,6 @@
 
 </div>
 <script>
-
     hiragana_list = [
         ["\u3042", "a", 0], ["\u3044", "i", 0], ["\u3046", "u", 0], ["\u3048", "e", 0], ["\u304A", "o", 0], ["\u304B", "ka", 0], ["\u304C", "ga", 1], ["\u304D", "ki", 0], ["\u304E", "gi", 1], ["\u304F", "ku", 0],
         ["\u3050", "gu", 1], ["\u3051", "ke", 0], ["\u3052", "ge", 1], ["\u3053", "ko", 0], ["\u3054", "go", 1], ["\u3055", "sa", 0], ["\u3056", "za", 1], ["\u3057", "shi", 0], ["\u3058", "ji", 1], ["\u3059", "su", 0], ["\u305A", "zu", 1], ["\u305B", "se", 0], ["\u305C", "ze", 1], ["\u305D", "so", 0], ["\u305E", "zo", 1], ["\u305F", "ta", 0],
@@ -248,12 +247,11 @@
         ["\u3080", "mu", 0], ["\u3081", "me", 0], ["\u3082", "mo", 0], /*["\u3083", "bi", 0],*/ ["\u3084", "ya", 0], /*["\u3085", "su", 0],*/ ["\u3086", "yu", 0], /*["\u3087", "pu", 2],*/ ["\u3088", "yo", 0], ["\u3089", "ra", 0], ["\u308A", "ri", 0], ["\u308B", "ru", 0], ["\u308C", "re", 0], ["\u308D", "ro", 0], /*["\u308E", "wa", 0],*/ ["\u308F", "wa", 0],
         /*["\u3090", "wi", 0], ["\u3091", "we", 0],*/ ["\u3092", "wo", 0], ["\u3093", "n", 0] /*["\u3094", "vu", 0], ["\u3095", "ka", 0], ["\u3096", "ke", 0],*/];
 
-    // TODO: use unicode codes & complete the list
     duolingo_levels = [
-        ["i", "chi", "ni", "n", "sa", "yo", "ro", "ku", "na", "o", "ha", "u", "shi", "a", "ka"],
-        ["mu", "ki", "ru", "ya", "ke", "no", "su", "te", "ri", "ma", "ho", "ta", "ko", "ra", "wa"],
-        ["nu", "ne", "to", "se", "mi", "me", "fu", "yu", "tsu", "mo", "hi", "re", "e", "he", "so"],
-        ["ga", "ji", "gu", "ge", "go", "za", "ji", "zu", "ze", "zo", "da", "zu", "de", "do", "ba", "be", "zu"]
+        ['\u3044', '\u3061', '\u306b', '\u3093', '\u3055', '\u3088', '\u308d', '\u304f', '\u306a', '\u304a', '\u306f', '\u3046', '\u3057', '\u3042', '\u304b'],
+        ['\u3080', '\u304d', '\u308b', '\u3084', '\u3051', '\u306e', '\u3059', '\u3066', '\u308a', '\u307e', '\u307b', '\u305f', '\u3053', '\u3089', '\u308f'],
+        ['\u306c', '\u306d', '\u3068', '\u305b', '\u307f', '\u3081', '\u3075', '\u3086', '\u3064', '\u3082', '\u3072', '\u308c', '\u3048', '\u3078', '\u305d'],
+        ['\u304c', '\u304e', '\u3050', '\u3052', '\u3054', '\u3056', '\u3058', '\u305a', '\u305c', '\u305e', '\u3060', '\u3062', '\u3065', '\u3067', '\u3069', '\u3070', '\u3073', '\u3076', '\u3079', '\u307c', '\u3071', '\u3074', '\u3077', '\u307a', '\u307d']
     ];
 
     settings = {
@@ -291,12 +289,28 @@
         elements.input_prompt.value = "";
         state.current_hiragana = hiragana_list[Math.floor(Math.random() * hiragana_list.length)];
 
-        while (!settings.include_dakouten && state.current_hiragana[2] > 0 || state.current_hiragana === previous_hiragana) {
+        while (!settings.include_dakouten && state.current_hiragana[2] > 0 || state.current_hiragana === previous_hiragana
+        || !matches_duolingo_level(state.current_hiragana[0], settings.duolingo_level)) {
             state.current_hiragana = hiragana_list[Math.floor(Math.random() * hiragana_list.length)];
         }
 
         document.getElementById("hiragana").innerHTML = state.current_hiragana[0];
         state.input_lock = false;
+    };
+
+    matches_duolingo_level = function (hiragana_char, level) {
+        if (level >= 4) {
+            return true;
+        }
+
+        for (var i = 0; i <= level; ++i) {
+            if (duolingo_levels[i].indexOf(hiragana_char) !== -1) {
+                console.log(i, hiragana_char);
+                return true;
+            }
+        }
+
+        return false;
     };
 
     register_guess = function (hiragana) {
