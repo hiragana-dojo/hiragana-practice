@@ -103,6 +103,7 @@
             font-size: 3em;
             font-weight: bold;
             outline: none;
+            visibility: hidden;
         }
 
         #input_prompt:focus {
@@ -189,6 +190,48 @@
             visibility: hidden;
         }
 
+        #choices {
+            display: flex;
+            flex-direction: row;
+        }
+
+        #choices div {
+            width: 4em;
+            height: 4em;
+            border-radius: .2em;
+            border: .1em solid #ddd;
+            background: #fafafa;
+            text-align: center;
+            line-height: 4em;
+            margin: .1em;
+            font-family: sans-serif;
+            font-weight: bold;
+            font-size: 2em;
+            color: #888;
+        }
+
+        #choices div:hover {
+            border: .1em solid #82b5ed;
+            color: #82b5ed;
+            cursor: pointer;
+        }
+
+        .choice-number {
+            position: relative;
+            bottom: 2em;
+            right: 0;
+            font-size: .5em;
+            color: #ccc;
+            text-align: right;
+            padding: .5em;
+            margin: 0;
+            line-height: 100%;
+        }
+
+        #choices div:hover .choice-number {
+            color: #82b5ed;
+        }
+
     </style>
 </head>
 <body>
@@ -230,6 +273,15 @@
 
     <!--suppress HtmlFormInputWithoutLabel -->
     <input id="input_prompt"/>
+
+    <div id="choices">
+        <div id="choice-1">ne
+            <p class="choice-number">1</p>
+        </div>
+        <div id="choice-2">re<p class="choice-number">2</p></div>
+        <div id="choice-3">ri<p class="choice-number">3</p></div>
+        <div id="choice-4">ro<p class="choice-number">4</p></div>
+    </div>
 
     <div id="history-wrap">
         <div id="overlay"></div>
