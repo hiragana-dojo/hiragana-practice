@@ -103,7 +103,6 @@
             font-size: 3em;
             font-weight: bold;
             outline: none;
-            visibility: hidden;
         }
 
         #input_prompt:focus {
@@ -193,6 +192,7 @@
         #choices {
             display: flex;
             flex-direction: row;
+            visibility: hidden;
         }
 
         #choices div {
@@ -413,6 +413,8 @@
         settings.ruthless = elements.settings.ruthless.checked;
         settings.include_dakouten = elements.settings.include_dakouten.checked;
         settings.duolingo_level = elements.settings.duolingo_level.selectedIndex;
+
+        show_new_hiragana();
     };
 
     /**
