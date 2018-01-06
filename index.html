@@ -120,7 +120,7 @@
 
         #settings-button {
             position: absolute;
-            margin-left: 50vw;
+            right: 25vw;
             margin-top: 1em;
             font-weight: bold;
             font-family: monospace;
@@ -192,10 +192,12 @@
         #choices {
             display: flex;
             flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: center;
             visibility: hidden;
         }
 
-        #choices div {
+        #choices .choice {
             width: 4em;
             height: 4em;
             border-radius: .2em;
@@ -210,7 +212,7 @@
             color: #888;
         }
 
-        #choices div:hover {
+        #choices .choice:hover {
             border: .1em solid #82b5ed;
             color: #82b5ed;
             cursor: pointer;
@@ -228,10 +230,33 @@
             line-height: 100%;
         }
 
-        #choices div:hover .choice-number {
+        #choices div:hover .choice {
             color: #82b5ed;
         }
 
+        #choices .choice.correct {
+            border-color: #6dab6d;
+            color: #6dab6d;
+        }
+
+        #choices .choice.incorrect {
+            border-color: #c24b4b;
+            color: #c24b4b;
+        }
+
+        @media (max-width: 700px) {
+            #input_prompt {
+                visibility: collapse;
+            }
+
+            #history-wrap {
+                visibility: collapse;
+            }
+
+            #choices {
+                visibility: visible;
+            }
+        }
     </style>
 </head>
 <body>
@@ -275,12 +300,10 @@
     <input id="input_prompt"/>
 
     <div id="choices">
-        <div id="choice-1">ne
-            <p class="choice-number">1</p>
-        </div>
-        <div id="choice-2">re<p class="choice-number">2</p></div>
-        <div id="choice-3">ri<p class="choice-number">3</p></div>
-        <div id="choice-4">ro<p class="choice-number">4</p></div>
+        <div id="choice-1" class="choice"><p class="choice-number">1</p></div>
+        <div id="choice-2" class="choice"><p class="choice-number">2</p></div>
+        <div id="choice-3" class="choice"><p class="choice-number">3</p></div>
+        <div id="choice-4" class="choice"><p class="choice-number">4</p></div>
     </div>
 
     <div id="history-wrap">
@@ -306,10 +329,14 @@
         ['\u304c', '\u304e', '\u3050', '\u3052', '\u3054', '\u3056', '\u3058', '\u305a', '\u305c', '\u305e', '\u3060', '\u3062', '\u3065', '\u3067', '\u3069', '\u3070', '\u3073', '\u3076', '\u3079', '\u307c', '\u3071', '\u3074', '\u3077', '\u307a', '\u307d']
     ];
 
+    similar_hiragana = [];
+
     settings = {
         ruthless: false,
         delay_hit: 10,
         delay_miss: 400,
+        delay_choice_hit: 200,
+        delay_choice_miss: 2000,
         include_dakouten: true,
         duolingo_level: 4
     };
@@ -317,11 +344,13 @@
     state = {
         input_lock: false,
         score: [0, 0],
-        current_hiragana: hiragana_list[0]
+        current_hiragana: hiragana_list[0],
+        choices: []
     };
 
     elements = {
         history: document.getElementById("history"),
+        hiragana: document.getElementById("hiragana"),
         input_prompt: document.getElementById("input_prompt"),
         score_hits: document.getElementById("hits"),
         score_misses: document.getElementById("misses"),
@@ -332,23 +361,79 @@
             ruthless: document.getElementById("setting-ruthless"),
             save: document.getElementById("save-settings"),
             open: document.getElementById("settings-button")
-        }
+        },
+        choices: [
+            document.getElementById("choice-1"),
+            document.getElementById("choice-2"),
+            document.getElementById("choice-3"),
+            document.getElementById("choice-4"),
+        ]
     };
 
     show_new_hiragana = function () {
         var previous_hiragana = state.current_hiragana;
+        var new_hiragana = find_new_hiragana(previous_hiragana, settings);
 
+        var choices = find_choices(new_hiragana, settings);
+
+        console.log(choices);
+
+        // update state
+        state.current_hiragana = new_hiragana;
+        state.input_lock = false;
+        state.choices = choices;
+
+        // update ui
         elements.input_prompt.value = "";
-        state.current_hiragana = hiragana_list[Math.floor(Math.random() * hiragana_list.length)];
+        elements.hiragana.innerHTML = state.current_hiragana[0];
+        for (var i = 0; i < 4; ++i) {
+            elements.choices[i].innerText = choices[i][1];
+            elements.choices[i].className = "choice";
+        }
+    };
 
-        while (!settings.include_dakouten && state.current_hiragana[2] > 0 || state.current_hiragana === previous_hiragana
-        || !matches_duolingo_level(state.current_hiragana[0], settings.duolingo_level)) {
-            state.current_hiragana = hiragana_list[Math.floor(Math.random() * hiragana_list.length)];
+    pick_choice = function (choice_index) {
+        if (state.choices[choice_index] === state.current_hiragana) {
+            elements.choices[choice_index].className = "choice correct";
+            setTimeout(function () {
+                register_miss(state.current_hiragana)
+            }, settings.delay_choice_hit);
+        } else {
+            elements.choices[choice_index].className = "choice incorrect";
+            for (var i = 0; i < 4; ++i) {
+                if (state.choices[i] === state.current_hiragana) {
+                    elements.choices[i].className = "choice correct";
+                }
+            }
+            setTimeout(function () {
+                register_miss(state.current_hiragana)
+            }, settings.delay_choice_miss);
+
+        }
+    };
+
+    function find_new_hiragana(excluded_hiragana, settings) {
+        var new_hiragana = hiragana_list[Math.floor(Math.random() * hiragana_list.length)];
+
+        while (!settings.include_dakouten && new_hiragana[2] > 0 || excluded_hiragana.indexOf(new_hiragana) !== -1
+        || !matches_duolingo_level(new_hiragana[0], settings.duolingo_level)) {
+            new_hiragana = hiragana_list[Math.floor(Math.random() * hiragana_list.length)];
+        }
+        return new_hiragana;
+    }
+
+    function find_choices(hiragana, settings) {
+        var choices = [hiragana];
+        while (choices.length < 4) {
+            choices.push(find_new_hiragana(choices, settings));
         }
 
-        document.getElementById("hiragana").innerHTML = state.current_hiragana[0];
-        state.input_lock = false;
-    };
+        var choice_index = Math.floor(Math.random() * 4);
+
+        choices[0] = choices[choice_index];
+        choices[choice_index] = hiragana;
+        return choices;
+    }
 
     matches_duolingo_level = function (hiragana_char, level) {
         if (level >= 4) {
@@ -466,13 +551,24 @@
         elements.settings.open.addEventListener("click", function () {
             show_settings();
         });
+
+        for (var i = 0; i < 4; ++i) {
+            const index = i;
+            elements.choices[i].addEventListener("click", function () {
+                if (state.input_lock) {
+                    return;
+                }
+
+                state.input_lock = true;
+                pick_choice(index);
+            });
+        }
     };
 
     init_listeners();
     show_new_hiragana();
     elements.input_prompt.placeholder = state.current_hiragana[1];
     elements.input_prompt.focus();
-
 </script>
 </body>
 </html>
