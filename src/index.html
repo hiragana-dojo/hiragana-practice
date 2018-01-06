@@ -1,0 +1,66 @@
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" type="image/png" href="favicon.png?v=10"/>
+    <title>Hiragana Practice</title>
+    <style>/*%CSS%*/</style>
+</head>
+<body>
+<div id="main">
+    <div id="settings-overlay" class="hidden">
+        <div id="settings-panel">
+            <h1>Settings</h1>
+            <form>
+                <p>
+                    <label for="setting-duolingo-level">Duolingo level</label>
+                    <select id="setting-duolingo-level">
+                        <option value="0">1</option>
+                        <option value="1">2</option>
+                        <option value="2">3</option>
+                        <option value="3">4</option>
+                        <option value="4">Over 9000</option>
+                    </select>
+                </p>
+                <p>
+                    <label for="setting-include-dakouten">Include dakouten</label>
+                    <input id="setting-include-dakouten" type="checkbox"/>
+                </p>
+                <p>
+                    <label for="setting-ruthless">Ruthless</label>
+                    <input id="setting-ruthless" type="checkbox"/>
+                </p>
+            </form>
+            <a id="save-settings" href="#">Save</a>
+        </div>
+    </div>
+
+    <div id="settings-button">&#9776;</div>
+    <div id="score">
+        <span id="hits">0</span>
+        <span id="misses">0</span>
+    </div>
+
+    <span id="hiragana"></span>
+
+    <!--suppress HtmlFormInputWithoutLabel -->
+    <input id="input_prompt"/>
+
+    <div id="choices">
+        <div id="choice-1">ne
+            <p class="choice-number">1</p>
+        </div>
+        <div id="choice-2">re<p class="choice-number">2</p></div>
+        <div id="choice-3">ri<p class="choice-number">3</p></div>
+        <div id="choice-4">ro<p class="choice-number">4</p></div>
+    </div>
+
+    <div id="history-wrap">
+        <div id="overlay"></div>
+        <div id="history">
+        </div>
+    </div>
+
+</div>
+<script>/*%JS%*/</script>
+</body>
+</html>

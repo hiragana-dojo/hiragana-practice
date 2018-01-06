@@ -212,12 +212,6 @@
             color: #888;
         }
 
-        #choices .choice:hover {
-            border: .1em solid #82b5ed;
-            color: #82b5ed;
-            cursor: pointer;
-        }
-
         .choice-number {
             position: relative;
             bottom: 2em;
@@ -230,8 +224,8 @@
             line-height: 100%;
         }
 
-        #choices div:hover .choice {
-            color: #82b5ed;
+        #choices div:hover {
+            cursor: pointer;
         }
 
         #choices .choice.correct {
@@ -255,6 +249,14 @@
 
             #choices {
                 visibility: visible;
+            }
+
+            #score {
+                visibility: collapse;
+            }
+
+            #settings-button {
+                right: 5vw;
             }
         }
     </style>
